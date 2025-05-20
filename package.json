@@ -16,7 +16,8 @@
     "format": "prettier --write 'src/**/*.ts'",
     "docs": "typedoc src/ --out public/docs",
     "check-permissions": "ts-node src/check-permissions.ts",
-    "thorough-check": "ts-node src/thorough-permission-check.ts"
+    "thorough-check": "ts-node src/thorough-permission-check.ts",
+    "test-api": "node test-api.js"
   },
   "keywords": [
     "screenshot",
