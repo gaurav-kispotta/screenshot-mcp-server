@@ -19,15 +19,6 @@ describe('Screenshot Engine', () => {
       const buffer = await screenshotEngine.captureScreen();
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
-
-      // Save the screenshot to a temporary file
-      const tempDir = './temp';
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir);
-      }
-      const tempFilePath = path.join(tempDir, `screenshot-${Date.now()}.png`);
-      fs.writeFileSync(tempFilePath, buffer);
-      console.log('Screenshot saved to:', tempFilePath);
     } catch (error) {
       console.log('Skipping test: screen recording permission might not be granted');
     }
