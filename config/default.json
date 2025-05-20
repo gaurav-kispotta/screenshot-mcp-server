@@ -1,0 +1,20 @@
+{
+  "port": 3000,
+  "host": "localhost",
+  "corsOrigins": ["*"],
+  "rateLimit": {
+    "windowMs": 900000,
+    "max": 100
+  },
+  "jwtSecret": "change-this-in-production",
+  "logging": {
+    "level": "info",
+    "directory": "./logs"
+  },
+  "screenshot": {
+    "defaultFormat": "png",
+    "defaultQuality": 80,
+    "cacheEnabled": true,
+    "cacheDuration": 5000
+  }
+}

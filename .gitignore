@@ -1,0 +1,31 @@
+# Directory for logs
+logs/
+
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# Coverage reports
+coverage/
+
+# Environment variables
+.env
+
+# MacOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Editor configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jest
+coverage/
