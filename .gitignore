@@ -29,3 +29,4 @@ coverage/
 
 # Jest
 coverage/
+node_modules
