@@ -2,7 +2,15 @@ import * as path from 'path';
 import * as os from 'os';
 import { existsSync } from 'fs';
 import { program } from 'commander';
-import { MCPServer } from './server';
+import express from 'express';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { ScreenshotEngine } from './screenshot/engine';
+import { ImageProcessor } from './screenshot/processor';
+import { WindowManager } from './window/manager';
+import { WindowEventMonitor } from './window/events';
+import { AuditLogger } from './utils/audit';
+import { setupRoutes } from './api/routes';
 import { checkPermissions, showPermissionInstructions } from './utils/permissions';
 
 /**
@@ -46,24 +54,23 @@ function setupCLI(): void {
       }
       
       // Start the server
-      const server = new MCPServer(config);
       try {
-        await server.start();
+        const server = await startMCPServer(config);
         console.log(`MCP Server running at http://${config.host}:${config.port}`);
         
         // Handle shutdown signals
         process.on('SIGINT', async () => {
           console.log('Shutting down server...');
-          await server.stop();
+          await server.close();
           process.exit(0);
         });
         
         process.on('SIGTERM', async () => {
           console.log('Shutting down server...');
-          await server.stop();
+          await server.close();
           process.exit(0);
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to start server:', error);
         process.exit(1);
       }
@@ -71,6 +78,126 @@ function setupCLI(): void {
   
   // Parse arguments
   program.parse();
+}
+
+/**
+ * Start the MCP server with the provided configuration
+ */
+async function startMCPServer(config: any): Promise<McpServer> {
+  // Initialize core components
+  const screenshotEngine = new ScreenshotEngine();
+  const imageProcessor = new ImageProcessor();
+  const windowManager = new WindowManager();
+  const windowEventMonitor = new WindowEventMonitor(windowManager);
+  const auditLogger = new AuditLogger('logs');
+  
+  // Create Express application
+  const app = express();
+  
+  // Setup standard Express middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.static(path.join(__dirname, '../public')));
+  
+  // Setup API routes for legacy endpoints
+  setupRoutes(app, screenshotEngine, imageProcessor, windowManager, auditLogger);
+  
+  // Create MCP server
+  const mcpServer = new McpServer({
+    name: "screenshot-mcp-server",
+    version: "1.0.0"
+  }, {
+    capabilities: {
+      resources: { listChanged: true },
+      tools: { listChanged: true }
+    }
+  });
+  
+  // Register screenshot tools
+  mcpServer.tool(
+    "takeScreenshot",
+    "Takes a screenshot of the entire screen or a specific window",
+    {}, // No input parameters for demo purposes
+    async () => {
+      try {
+        const screenshotPath = await screenshotEngine.captureScreen();
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Screenshot captured and saved to ${screenshotPath}`
+            }
+          ]
+        };
+      } catch (error: any) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error taking screenshot: ${error.message}`
+            }
+          ],
+          isError: true
+        };
+      }
+    }
+  );
+  
+  // Store transports by session ID
+  const transports: Record<string, StreamableHTTPServerTransport> = {};
+  
+  // Handle POST requests for MCP
+  app.post('/mcp', async (req, res) => {
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
+    let transport: StreamableHTTPServerTransport;
+    
+    if (sessionId && transports[sessionId]) {
+      transport = transports[sessionId];
+    } else {
+      transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => {
+          const uuid = Math.random().toString(36).substring(2, 15) + 
+                      Math.random().toString(36).substring(2, 15);
+          return uuid;
+        },
+        onsessioninitialized: (sessionId) => {
+          // Store the transport by session ID
+          transports[sessionId] = transport;
+        }
+      });
+      // Fallback for cases where onsessioninitialized might not be called immediately
+      if (transport.sessionId && !transports[transport.sessionId]) {
+        transports[transport.sessionId] = transport;
+      }
+      
+      transport.onclose = () => {
+        if (transport.sessionId) {
+          delete transports[transport.sessionId];
+        }
+      };
+      
+      await mcpServer.connect(transport);
+    }
+    
+    await transport.handleRequest(req, res, req.body);
+  });
+  
+  // Start windowEventMonitor
+  windowEventMonitor.start();
+  
+  // Start the server
+  const port = config.port || 3000;
+  const host = config.host || 'localhost';
+  
+  // Return a Promise that resolves when the server is started
+  return new Promise((resolve, reject) => {
+    app.listen(port, host, () => {
+      console.log(`Server running on http://${host}:${port}`);
+      resolve(mcpServer);
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
 }
 
 /**
@@ -83,7 +210,7 @@ async function main(): Promise<void> {
     if (!existsSync(logsDir)) {
       require('fs').mkdirSync(logsDir, { recursive: true });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn(`Warning: Could not create logs directory: ${error}`);
   }
   
@@ -98,15 +225,26 @@ async function main(): Promise<void> {
       showPermissionInstructions(permissions);
     }
     
-    const server = new MCPServer();
-    server.start()
-      .then(() => {
-        console.log(`Server running at http://localhost:3000`);
-      })
-      .catch(error => {
-        console.error('Failed to start server:', error);
-        process.exit(1);
+    try {
+      const server = await startMCPServer({ port: 3000, host: 'localhost' });
+      console.log('Server running at http://localhost:3000');
+      
+      // Handle shutdown signals
+      process.on('SIGINT', async () => {
+        console.log('Shutting down server...');
+        await server.close();
+        process.exit(0);
       });
+      
+      process.on('SIGTERM', async () => {
+        console.log('Shutting down server...');
+        await server.close();
+        process.exit(0);
+      });
+    } catch (error: any) {
+      console.error('Failed to start server:', error);
+      process.exit(1);
+    }
   } else {
     // Setup CLI for command-based usage
     setupCLI();
