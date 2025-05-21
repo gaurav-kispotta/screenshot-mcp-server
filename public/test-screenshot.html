@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot MCP Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Screenshot MCP Test</h1>
+    <button id="takeScreenshot">Take Screenshot</button>
+    <div id="result">
+        <p>Result will appear here...</p>
+    </div>
+
+    <script>
+        document.getElementById('takeScreenshot').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Taking screenshot...</p>';
+            
+            try {
+                // Initialize the session
+                const initResponse = await fetch('http://localhost:3000/mcp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json, text/event-stream'
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'initialize',
+                        id: 'init-' + Date.now(),
+                        params: {
+                            capabilities: {
+                                tools: {
+                                    listChanged: true
+                                }
+                            }
+                        }
+                    })
+                });
+                
+                const initData = await initResponse.json();
+                console.log('Init response:', initData);
+                
+                // Extract the session ID
+                const sessionId = initResponse.headers.get('mcp-session-id');
+                console.log('Session ID:', sessionId);
+                
+                if (!sessionId) {
+                    resultDiv.innerHTML = '<p>Error: Failed to initialize session</p>';
+                    return;
+                }
+                
+                // Call the screenshot tool
+                const toolResponse = await fetch('http://localhost:3000/mcp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json, text/event-stream',
+                        'mcp-session-id': sessionId
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'callTool',
+                        id: 'tool-' + Date.now(),
+                        params: {
+                            name: 'takeScreenshot',
+                            params: {}
+                        }
+                    })
+                });
+                
+                const toolData = await toolResponse.json();
+                console.log('Tool response:', toolData);
+                
+                // Display the result
+                if (toolData.error) {
+                    resultDiv.innerHTML = `<p>Error: ${toolData.error.message}</p>`;
+                    return;
+                }
+                
+                if (toolData.result && toolData.result.content) {
+                    const textContent = toolData.result.content.find(c => c.type === 'text');
+                    const imageContent = toolData.result.content.find(c => c.type === 'image');
+                    
+                    let resultHTML = '';
+                    if (textContent) {
+                        resultHTML += `<p>${textContent.text}</p>`;
+                    }
+                    
+                    if (imageContent) {
+                        resultHTML += `<img src="data:${imageContent.mimeType};base64,${imageContent.data}" alt="Screenshot">`;
+                    }
+                    
+                    resultDiv.innerHTML = resultHTML || '<p>No content returned</p>';
+                } else {
+                    resultDiv.innerHTML = '<p>No result data</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

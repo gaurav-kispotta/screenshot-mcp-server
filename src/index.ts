@@ -5,6 +5,7 @@ import { program } from 'commander';
 import express from 'express';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { z } from 'zod';
 import { ScreenshotEngine } from './screenshot/engine';
 import { ImageProcessor } from './screenshot/processor';
 import { WindowManager } from './window/manager';
@@ -113,24 +114,47 @@ async function startMCPServer(config: any): Promise<McpServer> {
     }
   });
   
-  // Register screenshot tools
-  mcpServer.tool(
-    "takeScreenshot",
-    "Takes a screenshot of the entire screen or a specific window",
-    {}, // No input parameters for demo purposes
-    async () => {
+  // Register screenshot tools using registerTool method
+  mcpServer.registerTool(
+    "takeScreenshot", 
+    {
+      description: "Takes a screenshot of the entire screen or a specific window",
+      inputSchema: {},
+      outputSchema: {
+        success: z.boolean().describe("Whether the screenshot was captured successfully"),
+        timestamp: z.string().optional().describe("ISO timestamp when the screenshot was taken"),
+        error: z.string().optional().describe("Error message if the screenshot failed")
+      }
+    },
+    async (params, extra) => {
       try {
-        const screenshotPath = await screenshotEngine.captureScreen();
+        const screenshotBuffer = await screenshotEngine.captureScreen();
+        // Convert image to base64 for AI agent to view
+        const base64Image = screenshotBuffer.toString('base64');
+        
         return {
+          structuredContent: {
+            success: true,
+            timestamp: new Date().toISOString()
+          },
           content: [
             {
               type: "text",
-              text: `Screenshot captured and saved to ${screenshotPath}`
+              text: "Screenshot captured"
+            },
+            {
+              type: "image",
+              data: base64Image,
+              mimeType: "image/png"
             }
           ]
         };
       } catch (error: any) {
         return {
+          structuredContent: {
+            success: false,
+            error: error.message
+          },
           content: [
             {
               type: "text",

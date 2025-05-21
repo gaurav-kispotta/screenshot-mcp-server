@@ -1,0 +1,10 @@
+{
+  "name": "screenshot-mcp-client",
+  "version": "1.0.0",
+  "description": "Test client for screenshot MCP server",
+  "main": "test-client.js",
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

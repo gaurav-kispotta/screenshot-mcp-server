@@ -37,7 +37,8 @@
     "mdns": "^2.7.2",
     "sharp": "^0.32.0",
     "socket.io": "^4.6.1",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "zod": "^3.25.17"
   },
   "devDependencies": {
     "@types/commander": "^2.12.0",
