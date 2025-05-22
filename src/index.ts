@@ -286,7 +286,7 @@ async function startMCPServer(config: any): Promise<McpServer> {
   });
   
   // Start windowEventMonitor
-  windowEventMonitor.start();
+  //windowEventMonitor.start();
   
   // Start the server
   const port = config.port || 3000;
