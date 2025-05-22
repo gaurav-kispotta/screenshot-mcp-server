@@ -53,7 +53,7 @@ export class ScreenshotEngine {
    */
   async captureWindow(windowId: string, options: ScreenshotOptions = {}): Promise<Buffer> {
     const outputPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.${options.format || 'png'}`);
-    const args: string[] = ['-x', outputPath, '-l', windowId]; // Silent mode, window ID
+    const args: string[] = ['-l', windowId, '-x', outputPath]; // Silent mode, window ID
     
     if (options.format) args.push(`-t${options.format}`);
     if (options.noShadow) args.push('-o');
