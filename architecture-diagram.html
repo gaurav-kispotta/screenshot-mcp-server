@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot MCP Server Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            margin: 30px auto;
+        }
+        .note {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        .note h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Screenshot MCP Server Architecture</h1>
+        
+        <div class="mermaid">
+            flowchart TB
+                subgraph Client["Client Applications"]
+                    direction TB
+                    RestClient["RESTful API Client"]
+                    WsClient["WebSocket Client"]
+                    MCPClient["MCP Protocol Client"]
+                    CLIClient["CLI Tool"]
+                end
+
+                subgraph Server["Screenshot MCP Server"]
+                    direction TB
+                    
+                    subgraph API["API Layer"]
+                        direction LR
+                        ExpressRoutes["Express Routes"]
+                        WebSocketHandlers["WebSocket Handlers"]
+                        MCPHandler["MCP Protocol Handler"]
+                    end
+                    
+                    subgraph Core["Core Components"]
+                        direction TB
+                        WindowManager["Window Manager"]
+                        ScreenshotEngine["Screenshot Engine"]
+                        ImageProcessor["Image Processor"]
+                        WindowEvents["Window Event Monitor"]
+                    end
+                    
+                    subgraph Util["Utilities"]
+                        direction LR
+                        AuditLogger["Audit Logger"]
+                        PermissionCheck["Permission Checker"]
+                    end
+                end
+
+                subgraph OS["macOS System"]
+                    direction TB
+                    ScreenCaptureTool["screencapture CLI Tool"]
+                    AppleScript["AppleScript (osascript)"]
+                    Permissions["System Permissions"]
+                end
+
+                %% Client to API connections
+                RestClient -->|HTTP Requests| ExpressRoutes
+                WsClient -->|Socket Events| WebSocketHandlers
+                MCPClient -->|MCP Protocol| MCPHandler
+                CLIClient -->|Commands| Server
+
+                %% API to Core connections
+                ExpressRoutes --> WindowManager
+                ExpressRoutes --> ScreenshotEngine
+                ExpressRoutes --> ImageProcessor
+                WebSocketHandlers --> WindowManager
+                WebSocketHandlers --> ScreenshotEngine
+                WebSocketHandlers --> WindowEvents
+                MCPHandler --> WindowManager
+                MCPHandler --> ScreenshotEngine
+                MCPHandler --> ImageProcessor
+
+                %% Core internal connections
+                WindowManager <--> WindowEvents
+                ScreenshotEngine --> ImageProcessor
+
+                %% Core to Utilities connections
+                WindowManager --> AuditLogger
+                ScreenshotEngine --> AuditLogger
+                WindowEvents --> AuditLogger
+                ExpressRoutes --> AuditLogger
+                WebSocketHandlers --> AuditLogger
+                ScreenshotEngine --> PermissionCheck
+                WindowManager --> PermissionCheck
+
+                %% Core to OS connections
+                ScreenshotEngine -->|Executes| ScreenCaptureTool
+                WindowManager -->|Executes| AppleScript
+                WindowEvents -->|Monitors| AppleScript
+                PermissionCheck -->|Verifies| Permissions
+                
+                %% Styling
+                classDef clientNode fill:#d1f0fd,stroke:#0078d7,stroke-width:2px
+                classDef apiNode fill:#ffe6cc,stroke:#d79b00,stroke-width:2px
+                classDef coreNode fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+                classDef utilNode fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+                classDef osNode fill:#f8cecc,stroke:#b85450,stroke-width:2px
+                
+                class Client clientNode
+                class API apiNode
+                class Core coreNode
+                class Util utilNode
+                class OS osNode
+                
+                class RestClient,WsClient,MCPClient,CLIClient clientNode
+                class ExpressRoutes,WebSocketHandlers,MCPHandler apiNode
+                class WindowManager,ScreenshotEngine,ImageProcessor,WindowEvents coreNode
+                class AuditLogger,PermissionCheck utilNode
+                class ScreenCaptureTool,AppleScript,Permissions osNode
+        </div>
+
+        <div class="note">
+            <h3>Architecture Overview</h3>
+            <p>The Screenshot MCP Server provides a comprehensive framework for capturing and managing screenshots on macOS systems. 
+            It uses the native macOS command-line tools and AppleScript to interact with the operating system, 
+            while exposing functionality through multiple interfaces including RESTful APIs, WebSockets, and the Model Context Protocol (MCP).</p>
+            
+            <p>Core components include:</p>
+            <ul>
+                <li><strong>ScreenshotEngine</strong>: Handles the actual screenshot capture using macOS's screencapture utility</li>
+                <li><strong>WindowManager</strong>: Manages window identification and information using AppleScript</li>
+                <li><strong>ImageProcessor</strong>: Processes and optimizes captured images</li>
+                <li><strong>WindowEventMonitor</strong>: Tracks window changes and emits events</li>
+                <li><strong>AuditLogger</strong>: Logs all activities for security auditing</li>
+            </ul>
+            
+            <p>The server exposes these capabilities through multiple interfaces:</p>
+            <ul>
+                <li><strong>RESTful API</strong>: Express-based HTTP endpoints</li>
+                <li><strong>WebSocket API</strong>: Real-time events and commands using Socket.IO</li>
+                <li><strong>MCP Protocol</strong>: Model Context Protocol implementation</li>
+                <li><strong>CLI Tool</strong>: Command-line interface for local usage</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            logLevel: 'fatal',
+            securityLevel: 'loose',
+            flowchart: { 
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

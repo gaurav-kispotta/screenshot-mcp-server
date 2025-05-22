@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot MCP Server Architecture (Simple)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .mermaid {
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+        graph TB
+            Client["Client Applications"]
+            API["API Layer"]
+            MCP["MCP Protocol Handler"]
+            ScreenEngine["Screenshot Engine"]
+            ImgProc["Image Processor"]
+            WinManager["Window Manager"]
+            WinEvents["Window Event Monitor"]
+            Logger["Audit Logger"]
+            System["macOS System Tools"]
+
+            Client -->|"HTTP/WebSocket"| API
+            Client -->|"MCP Protocol"| MCP
+            
+            API --> ScreenEngine
+            API --> WinManager
+            API --> WinEvents
+            MCP --> ScreenEngine
+            MCP --> WinManager
+            
+            ScreenEngine --> ImgProc
+            ScreenEngine -->|"Executes"| System
+            WinManager -->|"AppleScript"| System
+            WinEvents -->|"Monitors"| WinManager
+            
+            ScreenEngine --> Logger
+            WinManager --> Logger
+            API --> Logger
+            
+            classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+            classDef client fill:#d1f0fd,stroke:#0078d7,stroke-width:2px;
+            classDef core fill:#d5e8d4,stroke:#82b366,stroke-width:2px;
+            classDef system fill:#f8cecc,stroke:#b85450,stroke-width:2px;
+            
+            class Client client;
+            class ScreenEngine,ImgProc,WinManager,WinEvents core;
+            class System system;
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default'
+        });
+        
+        // Wait for the diagram to render, then convert to image
+        setTimeout(function() {
+            const svg = document.querySelector('.mermaid svg');
+            if (svg) {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Create an image to draw the SVG
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // For debugging: show the canvas
+                    document.body.appendChild(canvas);
+                    
+                    // Convert canvas to PNG
+                    const a = document.createElement('a');
+                    a.download = 'architecture-simple.png';
+                    a.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+                
+                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
