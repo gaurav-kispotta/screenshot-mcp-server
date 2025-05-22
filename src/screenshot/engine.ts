@@ -1,8 +1,8 @@
-import * as path from 'path';
-import * as os from 'os';
-import * as fs from 'fs';
-import { exec, ExecOptions } from 'child_process';
-import { promisify } from 'util';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import { exec, ExecOptions } from 'node:child_process';
+import { promisify } from 'node:util';
 
 // Define types
 export interface ScreenshotOptions {
@@ -53,7 +53,7 @@ export class ScreenshotEngine {
    */
   async captureWindow(windowId: string, options: ScreenshotOptions = {}): Promise<Buffer> {
     const outputPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.${options.format || 'png'}`);
-    const args: string[] = ['-x', outputPath, '-l', windowId]; // Silent mode, window ID
+    const args: string[] = ['-l', windowId, '-x', outputPath]; // Silent mode, window ID
     
     if (options.format) args.push(`-t${options.format}`);
     if (options.noShadow) args.push('-o');

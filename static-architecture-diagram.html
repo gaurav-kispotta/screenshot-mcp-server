@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot MCP Server Architecture</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .note {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            text-align: left;
+        }
+        .note h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .module-box {
+            fill: #f9f9f9;
+            stroke: #666;
+            stroke-width: 2px;
+            rx: 10px;
+            ry: 10px;
+        }
+        .module-text {
+            font-family: sans-serif;
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+        .arrow {
+            stroke: #666;
+            stroke-width: 2px;
+            marker-end: url(#arrowhead);
+        }
+        .label {
+            font-family: sans-serif;
+            font-size: 12px;
+            fill: #555;
+        }
+        .server-container {
+            fill: #eaf4fc;
+            stroke: #0078d7;
+            stroke-width: 3px;
+            stroke-dasharray: 5,5;
+            rx: 15px;
+            ry: 15px;
+        }
+        .core-container {
+            fill: #e3f4e4;
+            stroke: #82b366;
+            stroke-width: 2px;
+            rx: 10px;
+            ry: 10px;
+        }
+        .os-container {
+            fill: #fae9e9;
+            stroke: #b85450;
+            stroke-width: 2px;
+            rx: 10px;
+            ry: 10px;
+        }
+        .api-component {
+            fill: #ffe6cc;
+            stroke: #d79b00;
+        }
+        .core-component {
+            fill: #d5e8d4;
+            stroke: #82b366;
+        }
+        .utility-component {
+            fill: #fff2cc;
+            stroke: #d6b656;
+        }
+        .client-component {
+            fill: #d1f0fd;
+            stroke: #0078d7;
+        }
+        .os-component {
+            fill: #f8cecc;
+            stroke: #b85450;
+        }
+        .container-label {
+            font-family: sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            fill: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Screenshot MCP Server Architecture</h1>
+        
+        <svg width="900" height="700" xmlns="http://www.w3.org/2000/svg">
+            <!-- Arrow marker definition -->
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+                </marker>
+            </defs>
+            
+            <!-- Client Applications Container -->
+            <rect x="300" y="10" width="300" height="80" class="module-box client-component" />
+            <text x="450" y="30" class="container-label">Client Applications</text>
+            <rect x="320" y="40" width="120" height="40" rx="5" ry="5" class="module-box client-component" />
+            <text x="380" y="60" class="module-text">RESTful Clients</text>
+            <rect x="460" y="40" width="120" height="40" rx="5" ry="5" class="module-box client-component" />
+            <text x="520" y="60" class="module-text">MCP Clients</text>
+            
+            <!-- Server Container -->
+            <rect x="100" y="120" width="700" height="400" class="server-container" />
+            <text x="400" y="145" class="container-label">Screenshot MCP Server</text>
+            
+            <!-- API Layer -->
+            <rect x="150" y="170" width="600" height="80" class="module-box" />
+            <text x="450" y="190" class="container-label">API Layer</text>
+            <rect x="170" y="200" width="180" height="40" rx="5" ry="5" class="module-box api-component" />
+            <text x="260" y="220" class="module-text">Express Routes</text>
+            <rect x="370" y="200" width="160" height="40" rx="5" ry="5" class="module-box api-component" />
+            <text x="450" y="220" class="module-text">WebSocket Handlers</text>
+            <rect x="550" y="200" width="180" height="40" rx="5" ry="5" class="module-box api-component" />
+            <text x="640" y="220" class="module-text">MCP Protocol Handler</text>
+            
+            <!-- Core Components -->
+            <rect x="150" y="270" width="600" height="160" class="core-container" />
+            <text x="450" y="290" class="container-label">Core Components</text>
+            <rect x="170" y="300" width="160" height="40" rx="5" ry="5" class="module-box core-component" />
+            <text x="250" y="320" class="module-text">Window Manager</text>
+            <rect x="350" y="300" width="200" height="40" rx="5" ry="5" class="module-box core-component" />
+            <text x="450" y="320" class="module-text">Screenshot Engine</text>
+            <rect x="570" y="300" width="160" height="40" rx="5" ry="5" class="module-box core-component" />
+            <text x="650" y="320" class="module-text">Image Processor</text>
+            <rect x="170" y="360" width="160" height="40" rx="5" ry="5" class="module-box core-component" />
+            <text x="250" y="380" class="module-text">Window Event Monitor</text>
+            <rect x="350" y="360" width="160" height="40" rx="5" ry="5" class="module-box utility-component" />
+            <text x="430" y="380" class="module-text">Audit Logger</text>
+            <rect x="570" y="360" width="160" height="40" rx="5" ry="5" class="module-box utility-component" />
+            <text x="650" y="380" class="module-text">Permission Checker</text>
+            
+            <!-- macOS System -->
+            <rect x="200" y="550" width="500" height="120" class="os-container" />
+            <text x="450" y="570" class="container-label">macOS System</text>
+            <rect x="220" y="590" width="140" height="40" rx="5" ry="5" class="module-box os-component" />
+            <text x="290" y="610" class="module-text">AppleScript</text>
+            <rect x="380" y="590" width="140" height="40" rx="5" ry="5" class="module-box os-component" />
+            <text x="450" y="610" class="module-text">screencapture</text>
+            <rect x="540" y="590" width="140" height="40" rx="5" ry="5" class="module-box os-component" />
+            <text x="610" y="610" class="module-text">System Permissions</text>
+            
+            <!-- Connections from Client to API -->
+            <line x1="380" y1="80" x2="260" y2="200" class="arrow" />
+            <text x="300" y="120" class="label">HTTP</text>
+            <line x1="520" y1="80" x2="640" y2="200" class="arrow" />
+            <text x="600" y="120" class="label">MCP Protocol</text>
+            
+            <!-- Connections from API to Core -->
+            <line x1="260" y1="240" x2="250" y2="300" class="arrow" />
+            <line x1="450" y1="240" x2="450" y2="300" class="arrow" />
+            <line x1="640" y1="240" x2="650" y2="300" class="arrow" />
+            
+            <!-- Connections between Core Components -->
+            <line x1="330" y1="320" x2="350" y2="320" class="arrow" />
+            <line x1="550" y1="320" x2="570" y2="320" class="arrow" />
+            <line x1="250" y1="340" x2="250" y2="360" class="arrow" />
+            <line x1="330" y1="380" x2="350" y2="380" class="arrow" />
+            <line x1="510" y1="380" x2="570" y2="380" class="arrow" />
+            
+            <!-- Connections to OS -->
+            <line x1="250" y1="400" x2="290" y2="590" class="arrow" />
+            <text x="230" y="490" class="label">Window Info</text>
+            <line x1="450" y1="340" x2="450" y2="590" class="arrow" />
+            <text x="470" y="490" class="label">Capture</text>
+            <line x1="650" y1="400" x2="610" y2="590" class="arrow" />
+            <text x="670" y="490" class="label">Check</text>
+        </svg>
+        
+        <div class="note">
+            <h3>Architecture Overview</h3>
+            <p>The Screenshot MCP Server provides a comprehensive framework for capturing and managing screenshots on macOS systems. 
+            It uses the native macOS command-line tools and AppleScript to interact with the operating system, 
+            while exposing functionality through multiple interfaces including RESTful APIs, WebSockets, and the Model Context Protocol (MCP).</p>
+            
+            <p>The architecture follows a layered design:</p>
+            <ol>
+                <li><strong>Client Layer</strong>: External applications access the server through REST APIs or MCP protocol</li>
+                <li><strong>API Layer</strong>: Handles client requests through Express routes, WebSocket handlers, and MCP protocol handlers</li>
+                <li><strong>Core Components</strong>: Implement the core functionality including window management, screenshot capture, and image processing</li>
+                <li><strong>OS Integration</strong>: Interfaces with macOS through AppleScript and native command-line tools</li>
+            </ol>
+            
+            <p>Key components include the Window Manager (tracking and identifying windows), Screenshot Engine (capturing screens and windows), 
+            Image Processor (optimizing images), and various utilities like the Audit Logger and Permission Checker.</p>
+        </div>
+    </div>
+</body>
+</html>

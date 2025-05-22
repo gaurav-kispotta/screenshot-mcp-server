@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { WindowManager, WindowInfo } from './manager';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
+import { WindowManager, WindowInfo } from './manager.js';
 
 const execPromise = promisify(exec);
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { checkPermissions, showPermissionInstructions } from './utils/permissions';
+import { checkPermissions, showPermissionInstructions } from './utils/permissions.js';
 
 /**
  * Permission Check Script

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot Tool Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            display: none;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Screenshot Tool Test</h1>
+    <p>Click the button below to take a screenshot and display it:</p>
+    <button id="takeScreenshot">Take Screenshot</button>
+    <div id="result">
+        <p>Screenshot:</p>
+        <img id="screenshot" src="" alt="Screenshot will appear here">
+    </div>
+
+    <script>
+        document.getElementById('takeScreenshot').addEventListener('click', async () => {
+            try {
+                // Initialize session
+                const initResponse = await fetch('http://localhost:3000/mcp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json, text/event-stream'
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'initialize',
+                        id: 'init-' + Date.now(),
+                        params: {
+                            capabilities: {
+                                tools: {
+                                    listChanged: true
+                                }
+                            }
+                        }
+                    })
+                });
+                
+                const initData = await initResponse.json();
+                console.log('Init response:', initData);
+                
+                // Get the session ID from headers
+                const sessionId = initResponse.headers.get('mcp-session-id');
+                console.log('Session ID:', sessionId);
+                
+                if (!sessionId) {
+                    alert('Failed to initialize session');
+                    return;
+                }
+                
+                // Call the screenshot tool
+                const toolResponse = await fetch('http://localhost:3000/mcp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json, text/event-stream',
+                        'mcp-session-id': sessionId
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'callTool',
+                        id: 'tool-' + Date.now(),
+                        params: {
+                            name: 'takeScreenshot',
+                            params: {}
+                        }
+                    })
+                });
+                
+                const toolData = await toolResponse.json();
+                console.log('Tool response:', toolData);
+                
+                // Find the image data
+                if (toolData.result && toolData.result.content) {
+                    const imageContent = toolData.result.content.find(item => item.type === 'image');
+                    if (imageContent) {
+                        // Display the image
+                        document.getElementById('screenshot').src = 
+                            `data:${imageContent.mimeType};base64,${imageContent.data}`;
+                        document.getElementById('result').style.display = 'block';
+                    } else {
+                        alert('No image data found in response');
+                    }
+                } else {
+                    alert('Failed to get screenshot: ' + 
+                          (toolData.error ? toolData.error.message : 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

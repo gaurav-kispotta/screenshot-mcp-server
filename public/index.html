@@ -1,345 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot MCP Server Demo</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      color: #333;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    h1 {
-      color: #0066cc;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    .sidebar {
-      flex: 1;
-      min-width: 300px;
-      background-color: #f5f5f7;
-      padding: 15px;
-      border-radius: 8px;
-      max-height: 800px;
-      overflow-y: auto;
-    }
-    .content {
-      flex: 2;
-      min-width: 400px;
-      display: flex;
-      flex-direction: column;
-    }
-    .window-item {
-      padding: 10px;
-      margin-bottom: 5px;
-      background-color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .window-item:hover {
-      background-color: #e1f0ff;
-    }
-    .window-item.active {
-      background-color: #0066cc;
-      color: white;
-    }
-    .controls {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #f5f5f7;
-      border-radius: 8px;
-    }
-    .controls button {
-      padding: 8px 16px;
-      margin-right: 10px;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .controls button:disabled {
-      background-color: #999;
-      cursor: not-allowed;
-    }
-    .screenshot-area {
-      background-color: #f5f5f7;
-      padding: 15px;
-      border-radius: 8px;
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .screenshot-img {
-      max-width: 100%;
-      max-height: 600px;
-      object-fit: contain;
-    }
-    .events {
-      margin-top: 20px;
-      background-color: #f5f5f7;
-      padding: 15px;
-      border-radius: 8px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    .event-item {
-      padding: 5px;
-      margin-bottom: 5px;
-      border-radius: 4px;
-      background-color: white;
-      font-size: 0.9rem;
-    }
-    .loading {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 255, 255, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      color: #0066cc;
-      visibility: hidden;
-    }
-    .showing-loading .loading {
-      visibility: visible;
-    }
-    select, input {
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin-right: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Test Client</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        .control-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .preview {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .window-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .window-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .window-item:hover {
+            background-color: #e9e9e9;
+        }
+        .window-item.selected {
+            background-color: #d5f5d5;
+            border-left: 4px solid #4CAF50;
+        }
+        #screenshot {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .log-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 4px;
+            font-family: monospace;
+            height: 100px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Screenshot MCP Server Demo</h1>
-    <p>Control and capture screenshots of macOS windows through the Media Control Protocol</p>
-  </header>
-
-  <div class="container">
-    <div class="sidebar">
-      <h2>Windows</h2>
-      <div>
-        <button id="refresh-windows-btn">Refresh List</button>
-        <button id="active-window-btn">Go to Active Window</button>
-      </div>
-      <div id="window-list"></div>
-    </div>
+    <h1>MCP Server Test Client</h1>
     
-    <div class="content">
-      <div class="controls">
-        <h2>Screenshot Controls</h2>
-        <div>
-          <select id="format-select">
-            <option value="png">PNG</option>
-            <option value="jpg">JPEG</option>
-            <option value="webp">WebP</option>
-            <option value="tiff">TIFF</option>
-          </select>
-          <input type="number" id="quality-input" min="1" max="100" value="80" placeholder="Quality (1-100)">
-          <button id="capture-window-btn" disabled>Capture Selected Window</button>
-          <button id="capture-screen-btn">Capture Full Screen</button>
+    <div class="container">
+        <div class="control-panel">
+            <h2>Control Panel</h2>
+            <div>
+                <label for="server-url">Server URL:</label>
+                <input type="text" id="server-url" value="http://localhost:3000" style="width: 100%; margin-bottom: 10px;">
+            </div>
+            <button id="connect-btn">Connect to Server</button>
+            <button id="list-windows-btn">List Windows</button>
+            <button id="active-window-btn">Get Active Window</button>
+            <button id="test-screenshot-btn">Test Screenshot</button>
+            
+            <div class="window-list" id="window-list">
+                <p>Connect to server to see available windows...</p>
+            </div>
         </div>
-      </div>
-      
-      <div class="screenshot-area" id="screenshot-container">
-        <img id="screenshot-img" class="screenshot-img" alt="No screenshot yet" style="display: none;">
-        <div class="loading">Capturing screenshot...</div>
-        <p id="no-screenshot-message">No screenshot captured yet. Select a window and click "Capture".</p>
-      </div>
-      
-      <div class="events">
-        <h2>Window Events</h2>
-        <div id="events-list"></div>
-      </div>
+        
+        <div class="preview">
+            <h2>Screenshot Preview</h2>
+            <div id="preview-container">
+                <p>Select a window to capture screenshot</p>
+            </div>
+            
+            <h3>Log</h3>
+            <div class="log-container" id="log-container"></div>
+        </div>
     </div>
-  </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // Connect to the WebSocket server
-    const socket = io();
-    
-    // DOM elements
-    const windowListEl = document.getElementById('window-list');
-    const refreshWindowsBtn = document.getElementById('refresh-windows-btn');
-    const activeWindowBtn = document.getElementById('active-window-btn');
-    const captureWindowBtn = document.getElementById('capture-window-btn');
-    const captureScreenBtn = document.getElementById('capture-screen-btn');
-    const formatSelect = document.getElementById('format-select');
-    const qualityInput = document.getElementById('quality-input');
-    const screenshotImg = document.getElementById('screenshot-img');
-    const noScreenshotMessage = document.getElementById('no-screenshot-message');
-    const screenshotContainer = document.getElementById('screenshot-container');
-    const eventsList = document.getElementById('events-list');
-    
-    // State
-    let selectedWindow = null;
-    let windows = [];
-    
-    // Update window list
-    function refreshWindows() {
-      socket.emit('windows:list', {}, (response) => {
-        if (response.success) {
-          windows = response.windows;
-          renderWindowList();
-        } else {
-          console.error('Failed to get windows:', response.error);
-        }
-      });
-    }
-    
-    // Find active window
-    function goToActiveWindow() {
-      socket.emit('windows:active', {}, (response) => {
-        if (response.success && response.window) {
-          selectedWindow = response.window;
-          renderWindowList();
-          scrollToSelectedWindow();
-        } else {
-          console.error('Failed to get active window:', response.error);
-        }
-      });
-    }
-    
-    // Render window list
-    function renderWindowList() {
-      windowListEl.innerHTML = '';
-      
-      windows.forEach(window => {
-        const windowEl = document.createElement('div');
-        windowEl.className = 'window-item';
-        if (selectedWindow && selectedWindow.id === window.id) {
-          windowEl.classList.add('active');
+    <script>
+        // Elements
+        const serverUrlInput = document.getElementById('server-url');
+        const connectBtn = document.getElementById('connect-btn');
+        const listWindowsBtn = document.getElementById('list-windows-btn');
+        const activeWindowBtn = document.getElementById('active-window-btn');
+        const testScreenshotBtn = document.getElementById('test-screenshot-btn');
+        const windowList = document.getElementById('window-list');
+        const previewContainer = document.getElementById('preview-container');
+        const logContainer = document.getElementById('log-container');
+        
+        let selectedWindow = null;
+        let isConnected = false;
+        
+        // Log helper function
+        function log(message, isError = false) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            if (isError) logEntry.style.color = 'red';
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
         }
         
-        windowEl.innerHTML = `
-          <strong>${window.title || 'Untitled'}</strong><br>
-          <small>${window.appName} (${window.bounds.width}×${window.bounds.height})</small>
-        `;
-        
-        windowEl.addEventListener('click', () => {
-          selectedWindow = window;
-          captureWindowBtn.disabled = false;
-          renderWindowList();
+        // Connect to server
+        connectBtn.addEventListener('click', async () => {
+            const serverUrl = serverUrlInput.value;
+            try {
+                log(`Connecting to ${serverUrl}...`);
+                // Assuming the server is running and we can connect even without a specific endpoint
+                // We'll try to fetch the windows list since there's no specific status endpoint
+                const response = await fetch(`${serverUrl}/api/v1/windows`);
+                if (response.ok) {
+                    log(`Connected successfully to MCP server!`);
+                    isConnected = true;
+                    connectBtn.textContent = 'Connected';
+                    connectBtn.style.backgroundColor = '#45a049';
+                } else {
+                    log(`Failed to connect: ${response.statusText}`, true);
+                }
+            } catch (error) {
+                log(`Error connecting to server: ${error.message}`, true);
+                isConnected = false;
+            }
         });
         
-        windowListEl.appendChild(windowEl);
-      });
-    }
-    
-    // Scroll to selected window
-    function scrollToSelectedWindow() {
-      const activeEl = windowListEl.querySelector('.window-item.active');
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-    
-    // Capture screenshot
-    function captureScreenshot(target, windowId = null) {
-      screenshotContainer.classList.add('showing-loading');
-      noScreenshotMessage.style.display = 'none';
-      
-      const options = {
-        format: formatSelect.value,
-        quality: parseInt(qualityInput.value, 10)
-      };
-      
-      const request = {
-        target,
-        options
-      };
-      
-      if (windowId) {
-        request.windowId = windowId;
-      }
-      
-      socket.emit('screenshot:capture', request, (response) => {
-        screenshotContainer.classList.remove('showing-loading');
+        // List Windows
+        listWindowsBtn.addEventListener('click', async () => {
+            if (!isConnected) {
+                log('Not connected to server. Please connect first.', true);
+                return;
+            }
+            
+            try {
+                log('Requesting window list...');
+                const serverUrl = serverUrlInput.value;
+                const response = await fetch(`${serverUrl}/api/v1/windows`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to get windows');
+                }
+                
+                const windows = result.data;
+                log(`Received ${windows.length} windows`);
+                
+                // Display windows
+                windowList.innerHTML = '';
+                windows.forEach(window => {
+                    const windowItem = document.createElement('div');
+                    windowItem.className = 'window-item';
+                    windowItem.textContent = `${window.appName}: ${window.title} (${window.bounds.width}x${window.bounds.height})`;
+                    windowItem.dataset.windowId = window.id;
+                    
+                    windowItem.addEventListener('click', () => {
+                        // Clear previous selection
+                        document.querySelectorAll('.window-item').forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                        
+                        // Select this window
+                        windowItem.classList.add('selected');
+                        selectedWindow = window;
+                        log(`Selected window: ${window.title}`);
+                    });
+                    
+                    windowList.appendChild(windowItem);
+                });
+            } catch (error) {
+                log(`Error fetching windows: ${error.message}`, true);
+            }
+        });
         
-        if (response.success) {
-          screenshotImg.src = `data:image/${response.metadata.format};base64,${response.image}`;
-          screenshotImg.style.display = 'block';
-        } else {
-          console.error('Screenshot capture failed:', response.error);
-          alert('Screenshot capture failed: ' + response.error);
-        }
-      });
-    }
-    
-    // Add window event
-    function addEvent(event) {
-      const eventEl = document.createElement('div');
-      eventEl.className = 'event-item';
-      
-      const time = new Date(event.timestamp).toLocaleTimeString();
-      eventEl.textContent = `[${time}] ${event.type}: ${event.window.title} (${event.window.appName})`;
-      
-      eventsList.prepend(eventEl);
-      
-      // Keep only last 20 events
-      const events = eventsList.querySelectorAll('.event-item');
-      if (events.length > 20) {
-        eventsList.removeChild(events[events.length - 1]);
-      }
-    }
-    
-    // Setup event handlers
-    refreshWindowsBtn.addEventListener('click', refreshWindows);
-    activeWindowBtn.addEventListener('click', goToActiveWindow);
-    
-    captureWindowBtn.addEventListener('click', () => {
-      if (selectedWindow) {
-        captureScreenshot('window', selectedWindow.id);
-      }
-    });
-    
-    captureScreenBtn.addEventListener('click', () => {
-      captureScreenshot('screen');
-    });
-    
-    // Socket event handlers
-    socket.on('connect', () => {
-      console.log('Connected to server');
-      refreshWindows();
-      goToActiveWindow();
-      
-      // Subscribe to window events
-      socket.emit('subscribe:window_events');
-    });
-    
-    socket.on('window_event', (event) => {
-      addEvent(event);
-      
-      // Refresh window list when windows change
-      if (['created', 'closed'].includes(event.type)) {
-        refreshWindows();
-      }
-    });
-    
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
-    });
-  </script>
+        // Get Active Window
+        activeWindowBtn.addEventListener('click', async () => {
+            if (!isConnected) {
+                log('Not connected to server. Please connect first.', true);
+                return;
+            }
+            
+            try {
+                log('Getting active window...');
+                const serverUrl = serverUrlInput.value;
+                const response = await fetch(`${serverUrl}/api/v1/windows/active`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to get active window');
+                }
+                
+                const window = result.data;
+                log(`Active window: ${window.appName}: ${window.title}`);
+                
+                // Highlight this window in the list
+                document.querySelectorAll('.window-item').forEach(item => {
+                    item.classList.remove('selected');
+                    if (item.dataset.windowId === window.id) {
+                        item.classList.add('selected');
+                        selectedWindow = window;
+                    }
+                });
+            } catch (error) {
+                log(`Error getting active window: ${error.message}`, true);
+            }
+        });
+        
+        // Take screenshot
+        testScreenshotBtn.addEventListener('click', async () => {
+            if (!isConnected) {
+                log('Not connected to server. Please connect first.', true);
+                return;
+            }
+            
+            if (!selectedWindow) {
+                log('No window selected. Please select a window first.', true);
+                return;
+            }
+            
+            try {
+                log(`Capturing screenshot of ${selectedWindow.title}...`);
+                const serverUrl = serverUrlInput.value;
+                const response = await fetch(`${serverUrl}/api/v1/screenshots/window/${selectedWindow.id}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                
+                // Display the image
+                previewContainer.innerHTML = '';
+                const image = document.createElement('img');
+                image.id = 'screenshot';
+                image.src = imageUrl;
+                previewContainer.appendChild(image);
+                
+                log('Screenshot captured successfully!');
+            } catch (error) {
+                log(`Error capturing screenshot: ${error.message}`, true);
+            }
+        });
+        
+        // Initialize
+        log('Test client initialized. Please connect to the MCP Server.');
+    </script>
 </body>
 </html>
