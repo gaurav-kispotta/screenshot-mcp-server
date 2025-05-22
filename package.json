@@ -3,20 +3,21 @@
   "version": "1.0.0",
   "description": "A Media Control Protocol (MCP) server that captures screenshots of windows in macOS",
   "main": "dist/index.js",
+  "type": "module",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/index.ts",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts'",
     "docs": "typedoc src/ --out public/docs",
-    "check-permissions": "ts-node src/check-permissions.ts",
-    "thorough-check": "ts-node src/thorough-permission-check.ts",
+    "check-permissions": "node --loader ts-node/esm src/check-permissions.ts",
+    "thorough-check": "node --loader ts-node/esm src/thorough-permission-check.ts",
     "test-api": "node test-api.js"
   },
   "keywords": [

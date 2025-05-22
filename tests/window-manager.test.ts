@@ -1,4 +1,4 @@
-import { WindowManager } from '../src/window/manager';
+import { WindowManager } from '../src/window/manager.js';
 
 describe('Window Manager', () => {
   let windowManager: WindowManager;

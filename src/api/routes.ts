@@ -1,9 +1,9 @@
 import express, { Request, Response, Router } from 'express';
-import { ScreenshotEngine } from '../screenshot/engine';
-import { ImageProcessor } from '../screenshot/processor';
-import { WindowManager } from '../window/manager';
-import { AuditLogger } from '../utils/audit';
-import { authenticateJWT } from './middleware';
+import { ScreenshotEngine } from '../screenshot/engine.js';
+import { ImageProcessor } from '../screenshot/processor.js';
+import { WindowManager } from '../window/manager.js';
+import { AuditLogger } from '../utils/audit.js';
+import { authenticateJWT } from './middleware.js';
 
 export function setupRoutes(
   app: express.Application, 

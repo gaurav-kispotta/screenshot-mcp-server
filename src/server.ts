@@ -1,17 +1,22 @@
 import express, { Request, Response, NextFunction } from 'express';
-import http from 'http';
+import http from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import winston from 'winston';
-import { ScreenshotEngine } from './screenshot/engine';
-import { ImageProcessor } from './screenshot/processor';
-import { WindowManager } from './window/manager';
-import { WindowEventMonitor } from './window/events';
-import { setupRoutes } from './api/routes';
-import { setupSocketHandlers } from './mcp/handlers';
-import { AuditLogger } from './utils/audit';
+import { ScreenshotEngine } from './screenshot/engine.js';
+import { ImageProcessor } from './screenshot/processor.js';
+import { WindowManager } from './window/manager.js';
+import { WindowEventMonitor } from './window/events.js';
+import { setupRoutes } from './api/routes.js';
+import { setupSocketHandlers } from './mcp/handlers.js';
+import { AuditLogger } from './utils/audit.js';
+
+// Get current file path and directory for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Interface for server configuration
 export interface ServerConfig {

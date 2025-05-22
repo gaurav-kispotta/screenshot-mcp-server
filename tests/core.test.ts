@@ -1,9 +1,9 @@
-import { ScreenshotEngine } from '../src/screenshot/engine';
-import { WindowManager } from '../src/window/manager';
+import { ScreenshotEngine } from '../src/screenshot/engine.js';
+import { WindowManager } from '../src/window/manager.js';
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
 
 describe('Screenshot Engine', () => {
   const screenshotEngine = new ScreenshotEngine();

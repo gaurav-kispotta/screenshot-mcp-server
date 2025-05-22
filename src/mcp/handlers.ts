@@ -1,9 +1,9 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { ScreenshotEngine } from '../screenshot/engine';
-import { ImageProcessor } from '../screenshot/processor';
-import { WindowManager } from '../window/manager';
-import { WindowEventMonitor } from '../window/events';
-import { AuditLogger } from '../utils/audit';
+import { ScreenshotEngine } from '../screenshot/engine.js';
+import { ImageProcessor } from '../screenshot/processor.js';
+import { WindowManager } from '../window/manager.js';
+import { WindowEventMonitor } from '../window/events.js';
+import { AuditLogger } from '../utils/audit.js';
 
 export function setupSocketHandlers(
   io: SocketIOServer,

@@ -1,9 +1,7 @@
 // Mock for the get-windows ESM module
-const getWindowsMock = {
-  openWindows: jest.fn().mockResolvedValue([]),
-  activeWindow: jest.fn().mockResolvedValue(null),
-  openWindowsSync: jest.fn().mockReturnValue([]),
-  activeWindowSync: jest.fn().mockReturnValue(null)
-};
+const openWindows = jest.fn().mockResolvedValue([]);
+const activeWindow = jest.fn().mockResolvedValue(null);
+const openWindowsSync = jest.fn().mockReturnValue([]);
+const activeWindowSync = jest.fn().mockReturnValue(null);
 
-module.exports = getWindowsMock;
+export { openWindows, activeWindow, openWindowsSync, activeWindowSync };

@@ -1,6 +1,6 @@
 import winston from 'winston';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 
 export interface AuditLog {
   timestamp: Date;

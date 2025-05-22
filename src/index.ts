@@ -1,18 +1,23 @@
-import * as path from 'path';
-import * as os from 'os';
-import { existsSync } from 'fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { program } from 'commander';
 import express from 'express';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
-import { ScreenshotEngine } from './screenshot/engine';
-import { ImageProcessor } from './screenshot/processor';
-import { WindowManager } from './window/manager';
-import { WindowEventMonitor } from './window/events';
-import { AuditLogger } from './utils/audit';
-import { setupRoutes } from './api/routes';
-import { checkPermissions, showPermissionInstructions } from './utils/permissions';
+import { ScreenshotEngine } from './screenshot/engine.js';
+import { ImageProcessor } from './screenshot/processor.js';
+import { WindowManager } from './window/manager.js';
+import { WindowEventMonitor } from './window/events.js';
+import { AuditLogger } from './utils/audit.js';
+import { setupRoutes } from './api/routes.js';
+import { checkPermissions, showPermissionInstructions } from './utils/permissions.js';
+
+// Get current file path and directory for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Setup and parse CLI commands

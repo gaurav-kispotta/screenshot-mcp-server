@@ -1,8 +1,8 @@
-import * as path from 'path';
-import * as os from 'os';
-import * as fs from 'fs';
-import { exec, ExecOptions } from 'child_process';
-import { promisify } from 'util';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import { exec, ExecOptions } from 'node:child_process';
+import { promisify } from 'node:util';
 
 // Define types
 export interface ScreenshotOptions {
